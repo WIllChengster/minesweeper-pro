@@ -1,7 +1,8 @@
 import React from 'react';
+import { cellType } from '../types'
 
 type CellProps = { 
-    cell_coordinate: String,
+    cell_coordinate: cellType,
     isBomb: Boolean,
     dig: Function
 }

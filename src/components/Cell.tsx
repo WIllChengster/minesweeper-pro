@@ -2,15 +2,15 @@ import React from 'react';
 import { cellType } from '../types'
 
 type CellProps = { 
-    cell_coordinate: cellType,
+    coordiante: cellType,
     isBomb: Boolean,
     dig: Function
 }
 
-const Cell = ({cell_coordinate, isBomb, dig}: CellProps) => {
+const Cell = ({coordiante, isBomb, dig}: CellProps) => {
     
     return (
-        <div onClick={(e) => dig(e, cell_coordinate)} className="cell" >
+        <div onClick={(e) => dig(e, coordiante)} className="cell" >
         </div>    
     )
 }

@@ -21,3 +21,7 @@
     height: 50px;
     background-color: gray;
 }
+
+.isDug{
+    background-color: lightgray
+}

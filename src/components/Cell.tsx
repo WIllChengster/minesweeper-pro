@@ -21,7 +21,7 @@ const Cell = ({coordiante, isBomb, dig, cellData}: CellProps) => {
     const digClass = cellData.isDug ? 'isDug' : ''
 
     return (
-        <div className={`cell ${digClass}`}  onClick={(e) => dig(e, coordiante)}>
+        <div className={`cell ${digClass}`}  onClick={() => dig(coordiante)}>
             {value}
         </div>    
     )

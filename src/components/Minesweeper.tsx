@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Cell from './Cell';
 import './Minesweeper.css';
-import { cellType } from '../types'
+import { cellData, cellCoordinate } from '../types'
 
 const Minesweeper = () => {
-    // const [bombsCoordinates, setBombsCoordinates] = useState<cellType[]>([]);
+    // const [bombsCoordinates, setBombsCoordinates] = useState<cellCoordinate[]>([]);
     const [bombs, setBombs] = useState<number>(40);
     const [columns, setColumns] = useState<number>(16);
     const [rows, setRows] = useState<number>(16);
-    const [cellGrid, setCellGrid] = useState<Array<string[]>>([['']]);
+    const [cellGrid, setCellGrid] = useState<Array<cellData[]>>([[]]);
 
     useEffect(() => {
         //create grid on render
@@ -16,7 +16,12 @@ const Minesweeper = () => {
         for (let i = 0; i < columns; i++) {
             const col = [];
             for (let j = 0; j < rows; j++) {
-                col.push('')
+                const cellPlaceholder: cellData = {
+                    isBomb: false,
+                    isDug: false,
+                    adjacentBombs: 0,
+                }
+                col.push(cellPlaceholder)
             }
             grid.push(col);
         }
@@ -37,12 +42,12 @@ const Minesweeper = () => {
                 const bomb_col = Math.floor(Math.random() * columns)
                 const bomb_row = Math.floor(Math.random() * rows)
 
-                if (newCellGrid[bomb_col][bomb_row] === 'bomb') {
+                if (newCellGrid[bomb_col][bomb_row].isBomb) {
                     //if bomb coordinate already exists in bomb_coordiantes array, then decrement bomb_i and continue for loop
                     bomb_i--;
                     continue;
                 } else {
-                    newCellGrid[bomb_col][bomb_row] = 'bomb'
+                    newCellGrid[bomb_col][bomb_row].isBomb = true
                 }
 
             }
@@ -57,12 +62,12 @@ const Minesweeper = () => {
             const row_map = col_val.map((row_val, row_index) => {
                 const cell_key = `${col_index} - ${row_index}`;
                 let isBomb = false;
-                if(row_val === 'bomb'){
+                if(row_val.isBomb){
                     isBomb = true;
                 }
                 const cell_coordiante = {col: col_index, row: row_index}
                 return (
-                    <Cell coordiante={cell_coordiante} dig={dig} isBomb={isBomb} key={cell_key} ></Cell>
+                    <Cell cellData={row_val} coordiante={cell_coordiante} dig={dig} isBomb={isBomb} key={cell_key} ></Cell>
                 )
             })
 
@@ -76,13 +81,26 @@ const Minesweeper = () => {
         return col_map
     };
 
-    const dig = (event: Event, coordinate: cellType) => {
+    const dig = (event: Event, coordinate: cellCoordinate) => {
+        const { col: clickedCol, row: clickedRow } = coordinate
         //OnClick handler for digging cells
-        console.log(perimeterCheck(coordinate));
+        const adjacentBombs = getAdjacentBombs(coordinate)
+        const clickedCell = cellGrid[clickedCol][clickedRow]
+
+        const clickedCellStatus: cellData = {
+            ...clickedCell,
+            isDug: true,
+            adjacentBombs,
+        }
+
+        const initialGrid = [...cellGrid];
+
+        initialGrid[clickedCol][clickedRow] = clickedCellStatus;
+        setCellGrid( prevGrid => initialGrid );
+
 
     };
-    generateCells()
-    const perimeterCheck = (cell_coordiante: cellType) => {
+    const getAdjacentBombs = (cell_coordiante: cellCoordinate) => {
         const { row: clickedRow, col:clickedCol } = cell_coordiante;
         //will be called when cell is clicked.
         //checks for bombs around cell and returns # of bombs;
@@ -102,7 +120,7 @@ const Minesweeper = () => {
         const botMidCoord = {col: clickedCol, row: clickedRow + 1};
         const botRightCoord = {col: clickedCol + 1, row: clickedRow + 1};
 
-        const perimetersArr:cellType[] = [
+        const perimetersArr:cellCoordinate[] = [
             topLeftCoord, 
             topMidCoord, 
             topRightCoord, 
@@ -127,11 +145,9 @@ const Minesweeper = () => {
                 continue;
             }
 
-            if(perimeterCell === 'bomb'){
+            if(perimeterCell.isBomb){
                 adjacentBombsCount++
             }
-            // console.log(cellGrid[periCol][periRow])
-
 
         }
         return adjacentBombsCount;
